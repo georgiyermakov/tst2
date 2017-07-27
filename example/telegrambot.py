@@ -1,49 +1,33 @@
-# -*- coding: utf-8 -*-
-# Example code for telegrambot.py module
-from telegram.ext import CommandHandler, MessageHandler, Filters
-from django_telegrambot.apps import DjangoTelegramBot
+import telebot
+from telebot import types
 
-import logging
-logger = logging.getLogger(__name__)
+TOKEN = '419956455:AAGvt0ESW5g7WmHTT9av557_Tm13rjmXCnM'
+bot = telebot.TeleBot(TOKEN)
 
 
-# Define a few command handlers. These usually take the two arguments bot and
-# update. Error handlers also receive the raised TelegramError object in error.
-def start(bot, update):
-    bot.sendMessage(update.message.chat_id, text='Hi!')
+@bot.message_handler(commands=['start'])
+def start(m):
+    """Отвечаем на команду /start
+    """
+    keyboard = types.InlineKeyboardMarkup()
+    keyboard.row(*[types.InlineKeyboardButton(text=name, callback_data=name) for name in ['СДЕЛАТЬ КРУТЫЕ БРЭЙДЫ']])
+    keyboard.row(*[types.InlineKeyboardButton(text=name, callback_data=name) for name in ['СФОТАТЬСЯ В ЗЕЛЕНОМ АВТОБУСЕ']])
+    keyboard.row(*[types.InlineKeyboardButton(text=name, callback_data=name) for name in ['ПОЛУЧИТЬ СЕКРЕТНУЮ СКИДКУ']])
+    keyboard.row(*[types.InlineKeyboardButton(text=name, callback_data=name) for name in ['СОХРАНИТЬ МОДНЫЙ СТИКЕРПАК']])
+    keyboard.row(*[types.InlineKeyboardButton(text=name, callback_data=name) for name in ['СТАТЬ АМБАССАДОРОМ']])
+    bot.send_message(m.chat.id, "Привет, я чат-бот MATRIX, который будет сегодня жужжать пчелой для всех гостей ПИКНИКА АФИШИ! Давай расскажу, что мы приготовили для тебя сегодня:", reply_markup=keyboard)
 
+@bot.callback_query_handler(func= lambda c: True)
+def inline(c):
+    if c.data == 'СДЕЛАТЬ КРУТЫЕ БРЭЙДЫ':
+        bot.send_message(chat_id=c.message.chat.id, text="Какой фестиваль можно представить без кос? Команда стилистов MATRIX целый день будет плести яркие брэйды с канекалоном всем желающим абсолютно бесплатно! Для того чтобы записаться, подойди на стойку ресепшн в бьюти-баре MATRIX. Торопись, желающих очень много!")
+    elif c.data == 'СФОТАТЬСЯ В ЗЕЛЕНОМ АВТОБУСЕ':
+        bot.send_message(chat_id=c.message.chat.id, text="В нашем зеленом фотобасе можно сделать крутые фото, которые сразу можно отправить себе на почту или распечатать прямо на месте. А если выложить фото в соцсети с #liveRAW и показать нашему промоутеру, то можно получить набор крутых наклеек BIOLAGE RAW. Торопись, количество наклеек ограничено")
+    elif c.data == 'ПОЛУЧИТЬ СЕКРЕТНУЮ СКИДКУ':
+        bot.send_message(chat_id=c.message.chat.id, text="Крутые продукты профессионального ухода за волосами MATRIX со скидкой 30% на www.matrix.ru. До конца лета для всех гостей ПИКНИКА по кодовому слову PICNICMATRIX. Ура!")
+    elif c.data == 'СОХРАНИТЬ МОДНЫЙ СТИКЕРПАК':
+        bot.send_message(chat_id=c.message.chat.id, text="Лови набор стикеров!")
+    elif c.data == 'СТАТЬ АМБАССАДОРОМ':
+        bot.send_message(chat_id=c.message.chat.id, text="Этой осенью запустится профессиональная эко-гамма по уходу за волосами Biolage RAW. Это не просто продукты, это манифест иного образа жизни. Хочешь узнать первым и стать лидером мнений новой гаммы? Оставляй свой e-mail, и мы отправим тебе инструкцию. #liveRAW")
 
-def help(bot, update):
-    bot.sendMessage(update.message.chat_id, text='Help!')
-
-
-def echo(bot, update):
-    bot.sendMessage(update.message.chat_id, text=update.message.text)
-
-
-def error(bot, update, error):
-    logger.warn('Update "%s" caused error "%s"' % (update, error))
-    
-
-def main():
-    logger.info("Loading handlers for telegram bot")
-    
-    # Default dispatcher (this is related to the first bot in settings.TELEGRAM_BOT_TOKENS)
-    dp = DjangoTelegramBot.dispatcher
-    # To get Dispatcher related to a specific bot
-    # dp = DjangoTelegramBot.getDispatcher('BOT_n_token')     #get by bot token
-    # dp = DjangoTelegramBot.getDispatcher('BOT_n_username')  #get by bot username
-    
-    # on different commands - answer in Telegram
-    dp.add_handler(CommandHandler("start", start))
-    dp.add_handler(CommandHandler("help", help))
-
-    # on noncommand i.e message - echo the message on Telegram
-    dp.add_handler(MessageHandler([Filters.text], echo))
-
-    # log all errors
-    dp.add_error_handler(error)
-
-    # log all errors
-    dp.addErrorHandler(error)
-
+bot.polling()
